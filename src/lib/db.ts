@@ -1,11 +1,9 @@
-import pg from "pg";
-const { Pool } = pg;
+import { Pool } from "@neondatabase/serverless";
 
+// For browser environments, @neondatabase/serverless handles the connection
+// without Node-only dependencies like 'net' or 'tls'.
 export const pool = new Pool({
     connectionString: import.meta.env.VITE_DATABASE_URL || process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false,
-    },
 });
 
 export const query = (text: string, params?: any[]) => {
