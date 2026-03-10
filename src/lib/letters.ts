@@ -1,5 +1,8 @@
+import { query } from "./db";
+import { getSessionUserId } from "./auth";
+
 export interface LetterEntry {
-  id: string;
+  id: string; // Used as UUID in DB
   date: string;
   time: string;
   content: string;
@@ -8,32 +11,70 @@ export interface LetterEntry {
   updatedAt: string;
 }
 
-const STORAGE_KEY = "letter-to-self-entries";
+export async function getEntries(): Promise<LetterEntry[]> {
+  const userId = getSessionUserId();
+  if (!userId) return [];
 
-export function getEntries(): LetterEntry[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
   try {
-    return JSON.parse(raw) as LetterEntry[];
-  } catch {
+    const res = await query(
+      "SELECT * FROM letters WHERE user_id = $1 ORDER BY created_at DESC",
+      [userId]
+    );
+    return res.rows.map(row => ({
+      id: row.id,
+      date: new Date(row.created_at).toISOString().split('T')[0],
+      time: new Date(row.created_at).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      }),
+      content: row.content,
+      emotionalState: row.emotional_state,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+  } catch (error) {
+    console.error("Failed to fetch entries:", error);
     return [];
   }
 }
 
-export function saveEntry(entry: LetterEntry): void {
-  const entries = getEntries();
-  const idx = entries.findIndex((e) => e.id === entry.id);
-  if (idx >= 0) {
-    entries[idx] = entry;
-  } else {
-    entries.push(entry);
+export async function saveEntry(entry: LetterEntry): Promise<void> {
+  const userId = getSessionUserId();
+  if (!userId) return;
+
+  const sql = `
+    INSERT INTO letters (id, user_id, content, emotional_state, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ON CONFLICT (id) DO UPDATE SET
+      content = EXCLUDED.content,
+      emotional_state = EXCLUDED.emotional_state,
+      updated_at = EXCLUDED.updated_at
+  `;
+
+  try {
+    await query(sql, [
+      entry.id,
+      userId,
+      entry.content,
+      entry.emotionalState,
+      entry.createdAt,
+      entry.updatedAt
+    ]);
+  } catch (error) {
+    console.error("Failed to save entry:", error);
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-export function deleteEntry(id: string): void {
-  const entries = getEntries().filter((e) => e.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+export async function deleteEntry(id: string): Promise<void> {
+  const userId = getSessionUserId();
+  if (!userId) return;
+
+  try {
+    await query("DELETE FROM letters WHERE id = $1 AND user_id = $2", [id, userId]);
+  } catch (error) {
+    console.error("Failed to delete entry:", error);
+  }
 }
 
 export function generateId(): string {

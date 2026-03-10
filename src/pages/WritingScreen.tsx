@@ -38,12 +38,12 @@ const WritingScreen = () => {
   });
 
   const doSave = useCallback(
-    (text: string) => {
+    async (text: string) => {
       setSaveStatus("saving");
       entryRef.current.content = text;
       entryRef.current.updatedAt = new Date().toISOString();
-      saveEntry(entryRef.current);
-      setTimeout(() => setSaveStatus("saved"), 400);
+      await saveEntry(entryRef.current);
+      setSaveStatus("saved");
     },
     []
   );
@@ -51,7 +51,9 @@ const WritingScreen = () => {
   // Auto-save every 5 seconds
   useEffect(() => {
     if (!content) return;
-    const timer = setInterval(() => doSave(content), 5000);
+    const timer = setInterval(() => {
+      doSave(content);
+    }, 5000);
     return () => clearInterval(timer);
   }, [content, doSave]);
 
@@ -60,12 +62,12 @@ const WritingScreen = () => {
     textareaRef.current?.focus();
   };
 
-  const handleSave = () => {
-    doSave(content);
+  const handleSave = async () => {
+    await doSave(content);
   };
 
-  const handleFinish = () => {
-    doSave(content);
+  const handleFinish = async () => {
+    await doSave(content);
     navigate("/check-in", { state: { entryId: entryRef.current.id } });
   };
 
@@ -124,16 +126,14 @@ const WritingScreen = () => {
               ✨ Need Some Inspiration?
             </span>
             <ChevronDown
-              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
-                inspirationOpen ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${inspirationOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
           <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              inspirationOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
-            }`}
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${inspirationOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+              }`}
           >
             <div className="px-5 pb-5 grid gap-3">
               {PROMPTS.map((prompt) => (

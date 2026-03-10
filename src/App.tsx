@@ -10,6 +10,7 @@ import CompletionScreen from "./pages/CompletionScreen";
 import PastLetters from "./pages/PastLetters";
 import NotFound from "./pages/NotFound";
 import { LanguageSelector } from "./components/LanguageSelector";
+import { AuthGuard } from "./components/AuthGuard";
 
 const queryClient = new QueryClient();
 
@@ -20,14 +21,16 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter basename="/letter_to_self">
-        <Routes>
-          <Route path="/" element={<IntroScreen />} />
-          <Route path="/write" element={<WritingScreen />} />
-          <Route path="/check-in" element={<EmotionalCheckIn />} />
-          <Route path="/complete" element={<CompletionScreen />} />
-          <Route path="/letters" element={<PastLetters />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthGuard>
+          <Routes>
+            <Route path="/" element={<IntroScreen />} />
+            <Route path="/write" element={<WritingScreen />} />
+            <Route path="/check-in" element={<EmotionalCheckIn />} />
+            <Route path="/complete" element={<CompletionScreen />} />
+            <Route path="/letters" element={<PastLetters />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthGuard>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

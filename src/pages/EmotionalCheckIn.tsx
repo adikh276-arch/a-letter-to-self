@@ -17,14 +17,14 @@ const EmotionalCheckIn = () => {
   const entryId = (location.state as { entryId?: string })?.entryId;
   const [selected, setSelected] = useState<string | null>(null);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selected || !entryId) return;
-    const entries = getEntries();
+    const entries = await getEntries();
     const entry = entries.find((e) => e.id === entryId);
     if (entry) {
       entry.emotionalState = selected;
       entry.updatedAt = new Date().toISOString();
-      saveEntry(entry);
+      await saveEntry(entry);
     }
     navigate("/complete");
   };
@@ -41,11 +41,10 @@ const EmotionalCheckIn = () => {
             <button
               key={emotion}
               onClick={() => setSelected(emotion)}
-              className={`w-full text-left rounded-2xl px-5 py-4 text-sm leading-relaxed border letter-transition ${
-                selected === emotion
+              className={`w-full text-left rounded-2xl px-5 py-4 text-sm leading-relaxed border letter-transition ${selected === emotion
                   ? "border-primary bg-accent shadow-sm"
                   : "border-border/60 bg-card hover:border-primary/30"
-              }`}
+                }`}
             >
               {emotion}
             </button>

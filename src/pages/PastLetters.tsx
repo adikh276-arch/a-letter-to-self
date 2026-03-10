@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, ChevronLeft, Trash2 } from "lucide-react";
+import { Calendar, ChevronLeft, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getEntries, deleteEntry, formatDate, type LetterEntry } from "@/lib/letters";
 import {
@@ -16,21 +16,38 @@ import {
 
 const PastLetters = () => {
   const navigate = useNavigate();
-  const [entries, setEntries] = useState<LetterEntry[]>(() =>
-    getEntries().sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-  );
+  const [entries, setEntries] = useState<LetterEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedEntry, setSelectedEntry] = useState<LetterEntry | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleDelete = () => {
+  useEffect(() => {
+    const fetchEntries = async () => {
+      setLoading(true);
+      const data = await getEntries();
+      setEntries(data.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ));
+      setLoading(false);
+    };
+    fetchEntries();
+  }, []);
+
+  const handleDelete = async () => {
     if (!deleteId) return;
-    deleteEntry(deleteId);
+    await deleteEntry(deleteId);
     setEntries((prev) => prev.filter((e) => e.id !== deleteId));
     if (selectedEntry?.id === deleteId) setSelectedEntry(null);
     setDeleteId(null);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Full letter view
   if (selectedEntry) {
