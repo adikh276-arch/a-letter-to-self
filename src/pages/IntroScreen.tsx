@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Mail, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const IntroScreen = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 fade-enter">
@@ -15,15 +17,14 @@ const IntroScreen = () => {
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-3xl font-heading">💌 A Letter to Self</h1>
+          <h1 className="text-3xl font-heading">{t("title")}</h1>
           <p className="text-muted-foreground text-lg">
-            A moment of kindness, just for you
+            {t("subtitle")}
           </p>
         </div>
 
         <p className="text-justified text-foreground/80 leading-relaxed px-2">
-          Stress can make us forget how strong we are. This activity helps you
-          pause, reflect, and speak kindly to yourself.
+          {t("intro_text")}
         </p>
 
         <div className="space-y-3 pt-2">
@@ -31,19 +32,19 @@ const IntroScreen = () => {
             onClick={() => navigate("/write")}
             className="w-full rounded-2xl h-12 text-base font-medium"
           >
-            Start Writing →
+            {t("start_writing")}
           </Button>
           <Button
             variant="outline"
             onClick={() => navigate("/letters")}
             className="w-full rounded-2xl h-12 text-base font-medium"
           >
-            View Past Letters
+            {t("view_past_letters")}
           </Button>
         </div>
 
         <p className="text-muted-foreground text-sm pt-4 flex items-center justify-center gap-1.5">
-          No judgments. No pressure. Just you. <Leaf className="w-4 h-4 text-accent-foreground" />
+          {t("no_judgments")} <Leaf className="w-4 h-4 text-accent-foreground" />
         </p>
       </div>
     </div>

@@ -9,15 +9,17 @@ import EmotionalCheckIn from "./pages/EmotionalCheckIn";
 import CompletionScreen from "./pages/CompletionScreen";
 import PastLetters from "./pages/PastLetters";
 import NotFound from "./pages/NotFound";
+import { LanguageSelector } from "./components/LanguageSelector";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <LanguageSelector />
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/letter_to_self">
         <Routes>
           <Route path="/" element={<IntroScreen />} />
           <Route path="/write" element={<WritingScreen />} />
